@@ -6,8 +6,8 @@ Handle API-keys and secrets without hard coding them. Follow the principle about
 ## Metadata
 - **Date:** 2026-06-01
 - **Status:** Accepted
-- **Beslutsfattare:** Vivienne Bengtsson
-- **Relaterat:** 
+- **Descision maker:** Vivienne Bengtsson
+- **Related:** 
 
 ## Context 
 - We need a safe way on handling API-keys and secrets without hard coding them,
