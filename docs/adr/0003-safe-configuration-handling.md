@@ -16,7 +16,7 @@ Handle API-keys and secrets without hard coding them. Follow the principle about
 ## Decision
 We're using Azure Key Vault for storing secrets and Manage Identity (User-Assigned) to give the application access to the vault with no password.
 
-## Alternatices considered
+## Alternatives considered
 
 ### Alternative A: Environment variables in Azure Container Apps
 - **Advantages:** Easy to set up.
