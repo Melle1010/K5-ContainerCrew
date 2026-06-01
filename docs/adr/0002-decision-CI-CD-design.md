@@ -20,7 +20,6 @@ We use a two‑pipeline CI/CD setup in GitHub Actions:
 * A CD pipeline that runs only on pushes to main. It builds container images, pushes them to Azure Container Registry and deploys the services to Azure Container Apps.
 
 ## Motivation
-Motivation:  
 This separation ensures that all code is validated before merging, and only verified code is deployed. 
 It also aligns with real‑world DevOps practices and the assignment’s requirement for clear quality gates. 
 Deployment is predictable, traceable, and secure through OIDC‑based authentication.
