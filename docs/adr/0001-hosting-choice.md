@@ -43,7 +43,3 @@ Use **Azure Container Apps (ACA)** for all workloads. Everything runs as Docker 
 - Slightly more setup upfront than a zip deploy.
 
 ---
-
-## Follow-up
-
-Re-evaluate after 3 months in production. Key things to track: monthly cost vs. estimate, deploy time (target < 5 min), and scale-to-zero actually firing in non-prod.
