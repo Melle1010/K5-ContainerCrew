@@ -25,15 +25,15 @@ By centralizing the LLM call in Service B, we gain a predictable integration poi
 ## Consequences
 
 ### Positive consequences:
-* Only tested and validated code reaches production.
-* Deployment is fully automated and reproducible.
-* Image tagging with commit SHA provides strong traceability.
-* No secrets are stored in the code nor in the pipeline due to Azure Key Vault.
+* Secrets are never exposed to the frontend or to Service A.
+* Failures from the LLM provider are handled in one place, making the system more stable.
+* Service A remains lightweight and focused on application logic.
+* Logging and monitoring of AI calls become easier and more consistent.
 
 ### Negative consequences:
-* Azure integration takes time.
+* The communication between Service A and Service B must be well‑defined to avoid inconsistencies.
+* Centralized error handling can make it harder to trace where a failure originated unless logging and correlation are implemented carefully.
 
 ## Follow-up
-* The CI pipeline consistently catches build or test failures before code is merged.
-* The CD pipeline deploys only when the CI pipeline is green, ensuring production remains stable.
-* The Azure environment always reflects the state of the main branch without manual intervention.
+We will evaluate the decision based on whether AI‑related failures are isolated to Service B, whether Key Vault access remains secure and traceable, and whether the frontend consistently receives stable responses even during external API issues.
+The decision will be revisited if the AI provider changes, if latency becomes a problem, or if the architecture evolves to require fewer services.
