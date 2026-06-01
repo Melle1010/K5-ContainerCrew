@@ -6,7 +6,7 @@
 
 ## Context
 
-We needed a hosting platform in Azure that scales with usage, doesn't require managing Kubernetes ourselves, and can run frontends, APIs, and background workers in one place, without paying for idle resources.
+We needed a hosting platform in Azure that scales with usage, and can run frontends, APIs, and background workers in one place, without paying for idle resources.
 
 ---
 
