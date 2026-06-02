@@ -52,7 +52,20 @@ builder.Services.AddRateLimiter(options =>
 
 builder.Services.AddHttpClient<AiContentClient>(client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7013/"); // Service B HTTPS port
+    string baseUrl;
+
+    if (builder.Environment.IsDevelopment())
+    {
+        // Local development: Use localhost with HTTPS port
+        baseUrl = builder.Configuration["LlmProxy:BaseUrl"] ?? "https://localhost:7013/";
+    }
+    else
+    {
+        // Docker/Production: Use service name with HTTP port
+        baseUrl = "http://llmproxy:8080/";
+    }
+
+    client.BaseAddress = new Uri(baseUrl);
 });
 
 var app = builder.Build();
@@ -61,21 +74,15 @@ var app = builder.Build();
 
 app.UseCustomExceptionHandling();
 
-// Swagger
-//app.UseSwagger();
-//app.UseSwaggerUI();
-
-if (app.Environment.IsDevelopment())
+// Swagger and Scalar UI
+// Generate OpenAPI JSON
+app.UseSwagger(options =>
 {
-    // Generate OpenAPI JSON
-    app.UseSwagger(options =>
-    {
-        options.RouteTemplate = "openapi/{documentName}.json";
-    });
+    options.RouteTemplate = "openapi/{documentName}.json";
+});
 
-    // Enable Scalar UI
-    app.MapScalarApiReference();
-}
+// Enable Scalar UI
+app.MapScalarApiReference();
 
 app.UseRateLimiter();
 
