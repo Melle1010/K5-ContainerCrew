@@ -68,6 +68,15 @@ builder.Services.AddHttpClient<AiContentClient>(client =>
     client.BaseAddress = new Uri(baseUrl);
 });
 
+//CORS POLICY
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("StrictSecurityPolicy", policyBuilder =>
+    {
+        policyBuilder.WithOrigins("https://change-this-to-be-your-frontend-app.azurewebsites.net").WithMethods("GET", "POST").AllowAnyHeader(); //CHANGE THIS TO YOUR FRONTEND APP URL. THIS IS A PLACEHOLDER!!!
+    });
+});
+
 var app = builder.Build();
 
 
@@ -87,6 +96,8 @@ app.MapScalarApiReference();
 app.UseRateLimiter();
 
 app.UseHttpsRedirection();
+
+app.UseCors("StrictSecurityPolicy");
 
 app.MapControllers();
 
