@@ -1,6 +1,7 @@
 ﻿using AI_Content_Assistant.Clients;
 using AI_Content_Assistant.DTOs;
 using AI_Content_Assistant.Exceptions;
+using AI_Content_Assistant.Validators;
 using System.Net;
 
 namespace AI_Content_Assistant.Services
@@ -86,7 +87,10 @@ namespace AI_Content_Assistant.Services
 
             _logger.LogInformation("Gemini successfully generated output.");
 
-            // 6. Return final answer
+            // 6 Validate quality of the AI content
+            AiContentValidator.Validate(dto.Answer);
+
+            // 7. Return final answer
             return dto.Answer;
         }
     }

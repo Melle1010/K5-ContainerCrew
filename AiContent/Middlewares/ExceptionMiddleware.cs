@@ -65,18 +65,25 @@
                     Detail = rl.Message
                 },
 
-                GeminiOverloadedException go => new ProblemDetails
-                {
-                    Status = 503,
-                    Title = "Service Unavailable",
-                    Detail = go.Message
-                },
-
                 AiExternalException or AiEmptyResponseException or HttpRequestException => new ProblemDetails
                 {
                     Status = 502,
                     Title = "Bad Gateway",
                     Detail = ex.Message
+                },
+
+                AiContentQualityException aq => new ProblemDetails
+                {
+                    Status = 502,
+                    Title = "AI Content Quality Error",
+                    Detail = "The server received an invalid response from the LLM, please try again later."
+                },
+
+                GeminiOverloadedException go => new ProblemDetails
+                {
+                    Status = 503,
+                    Title = "Service Unavailable",
+                    Detail = go.Message
                 },
 
                 TaskCanceledException or OperationCanceledException => new ProblemDetails
