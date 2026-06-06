@@ -95,7 +95,10 @@ app.MapScalarApiReference();
 
 app.UseRateLimiter();
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsEnvironment("Container"))
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseCors("StrictSecurityPolicy");
 
