@@ -19,24 +19,40 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+    # 1. SETUP BUILDX (Required to unlock advanced GitHub caching capabilities)
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
     # ---------------------------------------------------------
-    # BYGG OCH PUSHA ALLA 3 IMAGES TILL ACR
+    # BYGG, CACHA OCH PUSHA ALLA 3 IMAGES TILL ACR
     # ---------------------------------------------------------
     - name: Build & Push to ACR
       run: |
         az acr login --name containercrewacrxm4icn3dsmsma
         
         # 1. Frontend
-        docker build -t containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-frontend:${{ github.sha }} -t containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-frontend:latest -f Frontend/Dockerfile Frontend
-        docker push containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-frontend:latest
+        docker build \
+          --cache-from=type=gha \
+          --cache-to=type=gha,mode=max \
+          -t containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-frontend:${{ github.sha }} \
+          -t containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-frontend:latest \
+          -f Frontend/Dockerfile Frontend --push
 
         # 2. AI Content
-        docker build -t containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-aicontent:${{ github.sha }} -t containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-aicontent:latest -f Backend/AiContent/Dockerfile Backend/AiContent
-        docker push containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-aicontent:latest
+        docker build \
+          --cache-from=type=gha \
+          --cache-to=type=gha,mode=max \
+          -t containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-aicontent:${{ github.sha }} \
+          -t containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-aicontent:latest \
+          -f Backend/AiContent/Dockerfile Backend/AiContent --push
 
         # 3. LLM Proxy
-        docker build -t containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-llmproxy:${{ github.sha }} -t containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-llmproxy:latest -f Backend/LlmProxy/Dockerfile Backend/LlmProxy
-        docker push containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-llmproxy:latest
+        docker build \
+          --cache-from=type=gha \
+          --cache-to=type=gha,mode=max \
+          -t containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-llmproxy:${{ github.sha }} \
+          -t containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-llmproxy:latest \
+          -f Backend/LlmProxy/Dockerfile Backend/LlmProxy --push
 
     # ---------------------------------------------------------
     # DRIFTSÄTT TILL SPECIFAKA CONTAINER APPS
@@ -47,7 +63,7 @@ jobs:
         acrName: containercrewacrxm4icn3dsmsma
         containerAppName: frontend-app
         resourceGroup: rg-containercrew
-        imageToDeploy: containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-frontend:latest
+        imageToDeploy: containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-frontend:${{ github.sha }}
 
     - name: Deploy AI Content to Container App
       uses: azure/container-apps-deploy-action@v1
@@ -55,7 +71,7 @@ jobs:
         acrName: containercrewacrxm4icn3dsmsma
         containerAppName: aicontent-app
         resourceGroup: rg-containercrew
-        imageToDeploy: containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-aicontent:latest
+        imageToDeploy: containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-aicontent:${{ github.sha }}
 
     - name: Deploy LLM Proxy to Container App
       uses: azure/container-apps-deploy-action@v1
@@ -63,4 +79,4 @@ jobs:
         acrName: containercrewacrxm4icn3dsmsma
         containerAppName: llmproxy-app
         resourceGroup: rg-containercrew
-        imageToDeploy: containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-llmproxy:latest
+        imageToDeploy: containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-llmproxy:${{ github.sha }}
