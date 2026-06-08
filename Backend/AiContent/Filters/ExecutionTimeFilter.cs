@@ -29,6 +29,7 @@ namespace AI_Content_Assistant.Filters
 
             _logger.LogInformation($"EXECUTION_TIME Action {actionName} executed in {elapsedMs} ms");
 
+
         }
     }
 }
