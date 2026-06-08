@@ -66,7 +66,10 @@ builder.Services.AddHttpClient<AiContentClient>(client =>
     client.BaseAddress = new Uri(baseUrl);
 
     // Extract the key from configuration and inject it into the X-API-KEY header
-    var apiKey = builder.Configuration["ServiceB:ApiKey"];
+    // and falls back to checking the flat environment variable name injected by Azure Secrets
+    var apiKey = builder.Configuration["ServiceB:ApiKey"]
+        ?? Environment.GetEnvironmentVariable("ServiceB__ApiKey");
+
     if (!string.IsNullOrWhiteSpace(apiKey))
     {
         client.DefaultRequestHeaders.Add("X-API-KEY", apiKey);
