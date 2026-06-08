@@ -1,9 +1,9 @@
 // open server go to the pages that you want to use, ctrl + shit + i -> devtools -> application -> service workers -> check offline and restart the page
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const CACHE_NAME = `workers-cache-${CACHE_VERSION}`;
 
 const ASSETS = [
-  "./", 
+  "./",
   "./index.html",
   "./manifest.json",
   "./sw.js",
@@ -36,7 +36,7 @@ const ASSETS = [
   "./src/scripts/timer.js",
   "./src/scripts/settingsDOM.js",
   "./src/scripts/statsDisplayDOM.js",
-  "./src/scripts/statsDisplayLogic.js",  
+  "./src/scripts/statsDisplayLogic.js",
   "./src/scripts/themes.js",
   "./src/scripts/timerDOM.js",
   "./src/scripts/training.js",
