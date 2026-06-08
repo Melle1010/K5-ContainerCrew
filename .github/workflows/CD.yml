@@ -1,0 +1,66 @@
+name: ContainerCrew CD
+
+on:
+  push:
+    branches: [ "master", "dev" ]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    # ---------------------------------------------------------
+    # BYGG OCH PUSHA ALLA 3 IMAGES TILL ACR
+    # ---------------------------------------------------------
+    - name: Build & Push to ACR
+      run: |
+        az acr login --name containercrewacrxm4icn3dsmsma
+        
+        # 1. Frontend
+        docker build -t containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-frontend:${{ github.sha }} -t containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-frontend:latest -f Frontend/Dockerfile Frontend
+        docker push containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-frontend:latest
+
+        # 2. AI Content
+        docker build -t containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-aicontent:${{ github.sha }} -t containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-aicontent:latest -f Backend/AiContent/Dockerfile Backend/AiContent
+        docker push containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-aicontent:latest
+
+        # 3. LLM Proxy
+        docker build -t containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-llmproxy:${{ github.sha }} -t containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-llmproxy:latest -f Backend/LlmProxy/Dockerfile Backend/LlmProxy
+        docker push containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-llmproxy:latest
+
+    # ---------------------------------------------------------
+    # DRIFTSÄTT TILL SPECIFAKA CONTAINER APPS
+    # ---------------------------------------------------------
+    - name: Deploy Frontend to Container App
+      uses: azure/container-apps-deploy-action@v1
+      with:
+        acrName: containercrewacrxm4icn3dsmsma
+        containerAppName: frontend-app
+        resourceGroup: rg-containercrew
+        imageToDeploy: containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-frontend:latest
+
+    - name: Deploy AI Content to Container App
+      uses: azure/container-apps-deploy-action@v1
+      with:
+        acrName: containercrewacrxm4icn3dsmsma
+        containerAppName: aicontent-app
+        resourceGroup: rg-containercrew
+        imageToDeploy: containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-aicontent:latest
+
+    - name: Deploy LLM Proxy to Container App
+      uses: azure/container-apps-deploy-action@v1
+      with:
+        acrName: containercrewacrxm4icn3dsmsma
+        containerAppName: llmproxy-app
+        resourceGroup: rg-containercrew
+        imageToDeploy: containercrewacrxm4icn3dsmsma.azurecr.io/k5-containercrew-llmproxy:latest
