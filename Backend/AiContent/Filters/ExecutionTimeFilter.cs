@@ -25,7 +25,10 @@ namespace AI_Content_Assistant.Filters
             var actionName = context.ActionDescriptor.DisplayName;
             var elapsedMs = stopwatch.ElapsedMilliseconds;
 
-            _logger.LogInformation("Action {ActionName} executed in {Elapsed} ms", actionName, elapsedMs);
+            //_logger.LogInformation("Action {ActionName} executed in {Elapsed} ms", actionName, elapsedMs);
+
+            _logger.LogInformation($"EXECUTION_TIME Action {actionName} executed in {elapsedMs} ms");
+
         }
     }
 }
