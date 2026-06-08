@@ -50,7 +50,7 @@ namespace AI_Content_Assistant.Services
             // 3. Sending DTO to Service B
             var response = await _client.SendPromptAsync(requestDto, ct);
 
-            _logger.LogInformation($"LOG: Response received from Service B statis {StatusCode}", response.StatusCode);
+            _logger.LogInformation("LOG: Response received from Service B status {StatusCode}", response.StatusCode);
 
             // 4. Error handling
             var status = (int)response.StatusCode;
