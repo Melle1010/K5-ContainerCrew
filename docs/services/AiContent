@@ -1,0 +1,15 @@
+# AI‑Driven Functionality in the Application 
+The AI‑driven functionality in the application is implemented through an integration with Gemini, accessed via a proxy service. 
+The purpose of this feature is to provide meaningful assistance to users who might have questions about the application itself or timers in general and how to use them. 
+To achieve this, the system uses a carefully designed system message that defines the AI’s persona, tone, and behavioral rules. 
+The persona, named Bob, is presented as a friendly and respectful expert in timers and clocks, someone who has spent his entire life working with timekeeping devices and who genuinely enjoys helping users. 
+
+The system message also contains strict structural rules that the AI must follow. 
+Bob must keep his answers brief, limited to a maximum of five sentences, and each sentence must remain short and easy to read. 
+These constraints ensure that the AI’s output remains concise and suitable for a mobile or web application where users expect quick, clear guidance rather than long explanations. 
+By combining domain expertise with a helpful personality and strict formatting rules, the system message ensures that the AI consistently produces output that is both useful and predictable.
+
+After the AI response is returned from the proxy service, the backend runs the response through a validator. 
+This validator checks whether the text is empty and counts the number of sentences by scanning for characters such as periods, exclamation marks, and question marks. 
+If the AI produces more than five sentences, or if the response is empty or otherwise invalid, the validator rejects the output by throwing an Exception. 
+This exception is then handled by the global exception middleware, which converts it into a clear json error response that follow the RFC 7807 standard. 
