@@ -56,13 +56,14 @@ builder.Services.AddHttpClient<AiContentClient>(client =>
 
     if (builder.Environment.IsDevelopment())
     {
-        // Local development: Use localhost with HTTPS port
+        // Local development: Use localhost with HTTPS port (can be overridden via configuration)
         baseUrl = builder.Configuration["LlmProxy:BaseUrl"] ?? "https://localhost:7013/";
     }
     else
     {
-        // Docker/Production: Use service name with HTTP port
-        baseUrl = "http://llmproxy:8080/";
+        // Non-development (staging/production/container): prefer configured value, fall back to the Azure Container Apps internal hostname
+        baseUrl = builder.Configuration["LlmProxy:BaseUrl"] 
+            ?? "https://llmproxy-app.internal.ashyflower-20b74b17.swedencentral.azurecontainerapps.io/";
     }
 
     client.BaseAddress = new Uri(baseUrl);
