@@ -30,7 +30,7 @@ namespace AI_Content_Assistant.Services
 
         public async Task<string> CreateAsync(string userQuery, CancellationToken ct)
         {
-            _logger.LogInformation("Building a Gemini prompt...");
+            _logger.LogInformation($"LOG: Building a Gemini prompt...");
 
             // 1. Building system + user message
             string systemMessage =
@@ -45,12 +45,12 @@ namespace AI_Content_Assistant.Services
             // 2. Creating DTO to send to Service B
             var requestDto = new LlmRequestDto(finalPrompt);
 
-            _logger.LogInformation("Sending prompt to Service B...");
+            _logger.LogInformation($"LOG: Sending prompt to Service B...");
 
             // 3. Sending DTO to Service B
             var response = await _client.SendPromptAsync(requestDto, ct);
 
-            _logger.LogInformation("Response received from Service B statis {StatusCode}", response.StatusCode);
+            _logger.LogInformation("LOG: Response received from Service B status {StatusCode}", response.StatusCode);
 
             // 4. Error handling
             var status = (int)response.StatusCode;
@@ -85,7 +85,7 @@ namespace AI_Content_Assistant.Services
                 throw new AiEmptyResponseException("Service B returned an empty response.");
             }
 
-            _logger.LogInformation("Gemini successfully generated output.");
+            _logger.LogInformation($"LOG: Gemini successfully generated output.");
 
             // 6 Validate quality of the AI content
             AiContentValidator.Validate(dto.Answer);
@@ -95,3 +95,4 @@ namespace AI_Content_Assistant.Services
         }
     }
 }
+
