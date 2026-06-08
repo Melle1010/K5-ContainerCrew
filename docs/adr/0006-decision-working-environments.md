@@ -13,7 +13,7 @@ Our full‑stack system must operate in multiple environments.
 ## Decision
 We define two environments: local and production.
 
-The local environment is used during development. All services run on the developer machine, either directly with dotnet run or in local containers. Local configuration and secrets are injected through environment variables, which remain outside the repository and are excluded from all Docker builds. The goal is to allow developers to start the system quickly and test features without depending on Azure.
+The local environment is used during development. All services run on the developer machine, either directly in local containers. Local configuration and secrets are injected through environment variables, which remain outside the repository and are excluded from both github and containers via gitignore and respectively dockerignore. The goal is to allow developers to start the system quickly and test features without depending on Azure.
 The production environment runs in Azure. The backend is deployed to Azure Container Apps, the frontend is hosted in Azure, and all secrets are stored in Azure Key Vault. Production is updated only through the CI/CD pipeline, not manually. This environment is the one used for external access and monitoring.
 
 ## Motivation
