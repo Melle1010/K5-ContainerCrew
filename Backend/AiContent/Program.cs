@@ -8,8 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using System.Reflection;
 
-
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Controllers + Swagger
@@ -22,7 +20,6 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(xmlPath);
 });
 
-
 // Services
 builder.Services.AddScoped<IAiContentService, AiContentService>();
 builder.Services.AddControllers(options =>
@@ -30,7 +27,7 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<ExecutionTimeFilter>();
 });
 
-//Ratelimiting
+// Ratelimiting
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -49,7 +46,7 @@ builder.Services.AddRateLimiter(options =>
     });
 });
 
-
+// HttpClient Configuration with Base URL and Key Validation Injection
 builder.Services.AddHttpClient<AiContentClient>(client =>
 {
     string baseUrl;
@@ -62,14 +59,21 @@ builder.Services.AddHttpClient<AiContentClient>(client =>
     else
     {
         // Non-development (staging/production/container): prefer configured value, fall back to the Azure Container Apps internal hostname
-        baseUrl = builder.Configuration["LlmProxy:BaseUrl"] 
+        baseUrl = builder.Configuration["LlmProxy:BaseUrl"]
             ?? "https://llmproxy-app.internal.ashyflower-20b74b17.swedencentral.azurecontainerapps.io/";
     }
 
     client.BaseAddress = new Uri(baseUrl);
+
+    // Extract the key from configuration and inject it into the X-API-KEY header
+    var apiKey = builder.Configuration["ServiceB:ApiKey"];
+    if (!string.IsNullOrWhiteSpace(apiKey))
+    {
+        client.DefaultRequestHeaders.Add("X-API-KEY", apiKey);
+    }
 });
 
-//CORS POLICY
+// CORS POLICY
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("StrictSecurityPolicy", policyBuilder =>
@@ -79,8 +83,6 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
-
-
 
 app.UseCustomExceptionHandling();
 
@@ -106,4 +108,3 @@ app.UseCors("StrictSecurityPolicy");
 app.MapControllers();
 
 app.Run();
-
