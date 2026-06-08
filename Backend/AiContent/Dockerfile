@@ -1,11 +1,12 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
-COPY Backend/AiContent/AiContent.csproj Backend/AiContent/
-RUN dotnet restore Backend/AiContent/AiContent.csproj
+# Copy the project file and restore dependencies (paths are relative to the build context)
+COPY AiContent.csproj ./
+RUN dotnet restore AiContent.csproj
 
-COPY Backend/AiContent/. Backend/AiContent/
-WORKDIR /src/Backend/AiContent
+# Copy the rest of the source code and publish
+COPY . ./
 RUN dotnet publish -c Release -o /app/publish /p:UseAppHost=false
 
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
