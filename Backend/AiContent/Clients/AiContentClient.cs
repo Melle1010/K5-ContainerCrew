@@ -20,8 +20,11 @@ namespace AI_Content_Assistant.Clients
             {
                 Content = JsonContent.Create(dto)
             };
-            var apiKey = _config["ServiceB:ApiKey"];
-            request.Headers.Add("X-API-KEY", apiKey);
+            var apiKey = _config["ServiceB:ApiKey"]
+                ?? _config["SECRET_API_KEY"]
+                ?? throw new InvalidOperationException("Missing API key configuration for ServiceB.");
+
+            request.Headers.TryAddWithoutValidation("X-API-KEY", apiKey);
 
             return await _httpClient.SendAsync(request, ct);
         }
@@ -30,8 +33,11 @@ namespace AI_Content_Assistant.Clients
         {
             var request = new HttpRequestMessage(HttpMethod.Get, "api/llm/models");
 
-            var apiKey = _config["ServiceB:ApiKey"];
-            request.Headers.Add("X-API-KEY", apiKey);
+            var apiKey = _config["ServiceB:ApiKey"]
+                ?? _config["SECRET_API_KEY"]
+                ?? throw new InvalidOperationException("Missing API key configuration for ServiceB.");
+
+            request.Headers.TryAddWithoutValidation("X-API-KEY", apiKey);
 
             var response = await _httpClient.SendAsync(request, ct);
             response.EnsureSuccessStatusCode();

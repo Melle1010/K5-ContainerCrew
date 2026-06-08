@@ -1,4 +1,5 @@
 using LLM_Proxy_API.Clients;
+using LLM_Proxy_API.Middlewares;
 //using LLM_Proxy_API.Extensions;
 //using Scalar.AspNetCore;
 
@@ -17,7 +18,7 @@ builder.Services.AddHttpClient<GeminiClient>(client =>
 
 var app = builder.Build();
 
-//app.UseApiKeyValidation();
+app.UseMiddleware<ApiKeyValidationMiddleware>();
 
 // Swagger
 //app.UseSwagger();
@@ -34,7 +35,10 @@ var app = builder.Build();
 //}
 
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsEnvironment("Container"))
+{
+    app.UseHttpsRedirection();
+}
 
 app.MapControllers();
 
