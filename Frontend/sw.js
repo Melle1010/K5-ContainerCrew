@@ -10,6 +10,7 @@ const ASSETS = [
   "./swCall.js",
 
   // HTML Files
+  "./bob.html",
   "./offline.html",
   "./overviewpage.html",
   "./pomodoromode.html",
