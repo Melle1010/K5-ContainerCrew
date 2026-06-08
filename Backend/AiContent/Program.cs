@@ -7,8 +7,12 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using System.Reflection;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//Activating Teleometry which sends data to Azure Monitor
+builder.Services.AddOpenTelemetry().UseAzureMonitor();
 
 // Controllers + Swagger
 builder.Services.AddControllers();
