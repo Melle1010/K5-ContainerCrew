@@ -85,7 +85,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("StrictSecurityPolicy", policyBuilder =>
     {
-        policyBuilder.WithOrigins("https://change-this-to-be-your-frontend-app.azurewebsites.net").WithMethods("GET", "POST").AllowAnyHeader(); //CHANGE THIS TO YOUR FRONTEND APP URL. THIS IS A PLACEHOLDER!!!
+        policyBuilder
+    .WithOrigins("https://frontend-app.ashyflower-20b74b17.swedencentral.azurecontainerapps.io")
+    .WithMethods("GET", "POST")
+    .AllowAnyHeader();
     });
 });
 
