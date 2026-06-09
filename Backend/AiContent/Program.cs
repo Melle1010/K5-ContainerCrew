@@ -12,7 +12,7 @@ using Azure.Monitor.OpenTelemetry.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
 //Activating Teleometry which sends data to Azure Monitor
-builder.Services.AddOpenTelemetry().UseAzureMonitor();
+//builder.Services.AddOpenTelemetry().UseAzureMonitor();
 
 // Controllers + Swagger
 builder.Services.AddControllers();
