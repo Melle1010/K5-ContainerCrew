@@ -1,5 +1,6 @@
 using LLM_Proxy_API.Clients;
 using LLM_Proxy_API.Middlewares;
+using Microsoft.AspNetCore.RateLimiting;
 //using LLM_Proxy_API.Extensions;
 //using Scalar.AspNetCore;
 
@@ -13,6 +14,33 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpClient<GeminiClient>(client =>
 {
     client.BaseAddress = new Uri("https://generativelanguage.googleapis.com/");
+});
+
+// Ratelimiting
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.OnRejected = async (context, token) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.ContentType = "application/json";
+
+        await context.HttpContext.Response.WriteAsJsonAsync(new
+        {
+            status = 429,
+            title = "Too Many Requests",
+            detail = "You have exceeded the allowed number of requests. Please try again later."
+        }, cancellationToken: token);
+    };
+
+
+    options.AddSlidingWindowLimiter("sliding", config =>
+    {
+        config.Window = TimeSpan.FromMinutes(1);
+        config.SegmentsPerWindow = 2;
+        config.PermitLimit = 2;
+    });
 });
 
 
@@ -34,6 +62,7 @@ app.UseMiddleware<ApiKeyValidationMiddleware>();
 //    app.MapScalarApiReference();
 //}
 
+app.UseRateLimiter();
 
 if (!app.Environment.IsEnvironment("Container"))
 {

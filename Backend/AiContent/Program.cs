@@ -31,25 +31,6 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<ExecutionTimeFilter>();
 });
 
-// Ratelimiting
-builder.Services.AddRateLimiter(options =>
-{
-    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-
-    options.OnRejected = async (context, token) =>
-    {
-        // Throwing here will produce a faulted Task and bubble to your ExceptionMiddleware
-        throw new RateLimitException("You have exceeded the allowed number of requests. Please try again later.");
-    };
-
-    options.AddSlidingWindowLimiter("sliding", config =>
-    {
-        config.Window = TimeSpan.FromMinutes(1);
-        config.SegmentsPerWindow = 2;
-        config.PermitLimit = 2;
-    });
-});
-
 // HttpClient Configuration with Base URL and Key Validation Injection
 builder.Services.AddHttpClient<AiContentClient>(client =>
 {
@@ -106,7 +87,7 @@ app.UseSwagger(options =>
 // Enable Scalar UI
 app.MapScalarApiReference();
 
-app.UseRateLimiter();
+//app.UseRateLimiter();
 
 if (!app.Environment.IsEnvironment("Container"))
 {
