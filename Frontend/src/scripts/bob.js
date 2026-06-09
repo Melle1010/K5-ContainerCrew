@@ -2,7 +2,7 @@ const inputField = document.querySelector(".chat-input-field");
 const sendBtn = document.querySelector(".chat-send-btn");
 const chatHistory = document.querySelector(".chat-history");
 
-const API_URL = "https://aicontent-app.ashyflower-20b74b17.swedencentral.azurecontainerapps.io/api/AiContent/generate/ai/posts";
+const API_URL = "/api/AiContent/generate/ai/posts";
 
 
 sendBtn.addEventListener("click", sendMessage);

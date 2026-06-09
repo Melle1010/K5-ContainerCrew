@@ -1,12 +1,10 @@
-FROM node:20-alpine
+FROM nginx:alpine
 
-WORKDIR /app
+WORKDIR /usr/share/nginx/html
 
-COPY package*.json ./
-RUN npm ci --no-audit --no-fund
-
-COPY . .
+COPY . /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/templates/default.conf.template
 
 EXPOSE 8080
 
-CMD ["npx", "http-server", ".", "-p", "8080", "-c-1"]
+CMD ["sh", "-c", "envsubst '$BACKEND_URL' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;' "]
