@@ -87,10 +87,10 @@ namespace AI_Content_Assistant.Services
                 throw new AiEmptyResponseException("Service B returned an empty response.");
             }
 
-            LogStep("Gemini successfully generated output.", stepTimer);
-
             // 6 Validate quality of the AI content
             AiContentValidator.Validate(dto.Answer);
+
+            LogStep("Gemini successfully generated output.", stepTimer);
 
             // 7. Return final answer
             return dto.Answer;
