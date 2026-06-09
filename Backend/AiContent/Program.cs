@@ -86,9 +86,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy("StrictSecurityPolicy", policyBuilder =>
     {
         policyBuilder
-    .WithOrigins("https://frontend-app.ashyflower-20b74b17.swedencentral.azurecontainerapps.io")
-    .WithMethods("GET", "POST")
-    .AllowAnyHeader();
+            .WithOrigins("https://frontend-app.ashyflower-20b74b17.swedencentral.azurecontainerapps.io")
+            .WithMethods("GET", "POST")
+            .AllowAnyHeader();
     });
 });
 

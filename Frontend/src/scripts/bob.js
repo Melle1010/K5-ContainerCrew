@@ -4,6 +4,7 @@ const chatHistory = document.querySelector(".chat-history");
 
 const API_URL = "https://aicontent-app.ashyflower-20b74b17.swedencentral.azurecontainerapps.io/api/AiContent/generate/ai/posts";
 
+
 sendBtn.addEventListener("click", sendMessage);
 inputField.addEventListener("keydown", e => {
     if (e.key === "Enter") sendMessage();
@@ -37,8 +38,29 @@ async function sendMessage() {
         });
 
         if (!response.ok) {
-            const errorText = `Error: ${response.status}`;
-            appendMessage(errorText, "bob");
+            let errorMessage = `Error ${response.status}`;
+
+            try {
+                const problem = await response.json();
+
+                if (problem) {
+                    const title = problem.title || "";
+                    const detail = problem.detail || "";
+
+                    if (title || detail) {
+                        errorMessage += `: ${title}`;
+                        if (detail) errorMessage += ` – ${detail}`;
+                    }
+                }
+            } catch (_) {
+                // If JSON parsing fails, try plain text
+                try {
+                    const text = await response.text();
+                    if (text) errorMessage += `: ${text}`;
+                } catch { }
+            }
+
+            appendMessage(errorMessage, "bob");
             return;
         }
 
