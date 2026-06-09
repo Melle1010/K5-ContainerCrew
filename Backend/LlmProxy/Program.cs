@@ -62,6 +62,7 @@ app.UseMiddleware<ApiKeyValidationMiddleware>();
 //    app.MapScalarApiReference();
 //}
 
+app.UseRateLimiter();
 
 if (!app.Environment.IsEnvironment("Container"))
 {

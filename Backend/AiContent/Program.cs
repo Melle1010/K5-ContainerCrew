@@ -87,7 +87,7 @@ app.UseSwagger(options =>
 // Enable Scalar UI
 app.MapScalarApiReference();
 
-app.UseRateLimiter();
+//app.UseRateLimiter();
 
 if (!app.Environment.IsEnvironment("Container"))
 {
