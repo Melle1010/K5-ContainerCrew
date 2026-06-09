@@ -35,6 +35,8 @@ namespace AI_Content_Assistant.Services
 
             LogStep("Building a Gemini prompt...", stepTimer);
 
+            await Task.Delay(10);
+
             // 1. Building system + user message
             string systemMessage =
                 "Your name is Bob." +
