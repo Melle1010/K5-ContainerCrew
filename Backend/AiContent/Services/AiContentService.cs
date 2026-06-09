@@ -2,6 +2,7 @@
 using AI_Content_Assistant.DTOs;
 using AI_Content_Assistant.Exceptions;
 using AI_Content_Assistant.Validators;
+using System.Diagnostics;
 using System.Net;
 
 namespace AI_Content_Assistant.Services
@@ -27,10 +28,14 @@ namespace AI_Content_Assistant.Services
             return await _client.GetModelsAsync(ct);
         }
 
-
         public async Task<string> CreateAsync(string userQuery, CancellationToken ct)
         {
-            _logger.LogInformation($"LOG: Building a Gemini prompt...");
+            var timer = Stopwatch.StartNew();
+
+            LogStep("Building a Gemini prompt...", timer);
+
+            await Task.Delay(10);
+
 
             // 1. Building system + user message
             string systemMessage =
@@ -45,12 +50,12 @@ namespace AI_Content_Assistant.Services
             // 2. Creating DTO to send to Service B
             var requestDto = new LlmRequestDto(finalPrompt);
 
-            _logger.LogInformation($"LOG: Sending prompt to Service B...");
+            LogStep("Sending prompt to Service B...", timer);
 
             // 3. Sending DTO to Service B
             var response = await _client.SendPromptAsync(requestDto, ct);
 
-            _logger.LogInformation("LOG: Response received from Service B status {StatusCode}", response.StatusCode);
+            LogStep($"Response received from Service B status {response.StatusCode}", timer);
 
             // 4. Error handling
             var status = (int)response.StatusCode;
@@ -76,7 +81,6 @@ namespace AI_Content_Assistant.Services
                     break;
             }
 
-
             // 5. Deserialize LlmResponseDto
             var dto = await response.Content.ReadFromJsonAsync<LlmResponseDto>(ct);
 
@@ -85,14 +89,21 @@ namespace AI_Content_Assistant.Services
                 throw new AiEmptyResponseException("Service B returned an empty response.");
             }
 
-            _logger.LogInformation($"LOG: Gemini successfully generated output.");
-
             // 6 Validate quality of the AI content
             AiContentValidator.Validate(dto.Answer);
+
+            LogStep("Gemini successfully generated output.", timer);
 
             // 7. Return final answer
             return dto.Answer;
         }
+        // Helping function for logging
+
+        private void LogStep(string message, Stopwatch timer)
+        {
+            var elapsed = timer.ElapsedMilliseconds;
+            _logger.LogInformation($"LOG: {message} | ELAPSED={elapsed}");
+            timer.Restart();
+        }
     }
 }
-
