@@ -60,26 +60,34 @@ namespace AI_Content_Assistant.Services
             // 4. Error handling
             var status = (int)response.StatusCode;
 
-            switch (status)
+            //switch (status)
+            //{
+            //    case 401:
+            //    case 403:
+            //        throw new UnauthorizedAccessException("Client is unauthorized or unauthenticated.");
+
+            //    case 429:
+            //        throw new RateLimitException("Rate limit exceeded. Please retry later.");
+
+            //    case int s when s >= 500 && s < 600:
+            //        throw new AiExternalException($"Service B returned {status}.");
+
+            //    default:
+            //        if (!response.IsSuccessStatusCode)
+            //            throw new AiExternalException($"Service B returned {status}.");
+            //        break;
+            //}
+
+
+            // Any non-success from Service B becomes an LlmProxyException
+            if (!response.IsSuccessStatusCode)
             {
-                case 401:
-                case 403:
-                    throw new UnauthorizedAccessException("Client is unauthorized or unauthenticated.");
-
-                case 429:
-                    throw new RateLimitException("Rate limit exceeded. Please retry later.");
-
-                case 503:
-                    throw new GeminiOverloadedException("Gemini is currently overloaded. Please try again later.");
-
-                case >= 500 and < 600:
-                    throw new AiExternalException($"Service B returned {status}.");
-
-                default:
-                    if (!response.IsSuccessStatusCode)
-                        throw new AiExternalException($"Service B returned {status}.");
-                    break;
+                throw new LlmProxyException(
+                    status,
+                    $"Service B returned status {status}."
+                );
             }
+
 
             // 5. Deserialize LlmResponseDto
             var dto = await response.Content.ReadFromJsonAsync<LlmResponseDto>(ct);
