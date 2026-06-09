@@ -1,11 +1,13 @@
 ﻿using LLM_Proxy_API.Clients;
 using LLM_Proxy_API.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Text.Json;
 
 namespace LLM_Proxy_API.Controllers
 {
     [ApiController]
+    [EnableRateLimiting("sliding")]
     [Route("api/llm")]
     public class GeminiController : ControllerBase
     {
