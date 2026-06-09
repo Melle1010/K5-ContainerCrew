@@ -34,24 +34,23 @@ builder.Services.AddControllers(options =>
 // HttpClient Configuration with Base URL and Key Validation Injection
 builder.Services.AddHttpClient<AiContentClient>(client =>
 {
-    string baseUrl;
+    string? baseUrl = builder.Configuration["LlmProxy:BaseUrl"];
 
-    if (builder.Environment.IsDevelopment())
+    // Om variabeln saknas helt i produktion/container slänger vi ett fel i stället för att ha en hårdkodad länk
+    if (string.IsNullOrWhiteSpace(baseUrl))
     {
-        // Local development: Use localhost with HTTPS port (can be overridden via configuration)
-        baseUrl = builder.Configuration["LlmProxy:BaseUrl"] ?? "https://localhost:7013/";
-    }
-    else
-    {
-        // Non-development (staging/production/container): prefer configured value, fall back to the Azure Container Apps internal hostname
-        baseUrl = builder.Configuration["LlmProxy:BaseUrl"]
-            ?? "https://llmproxy-app.internal.ashyflower-20b74b17.swedencentral.azurecontainerapps.io/";
+        if (builder.Environment.IsDevelopment())
+        {
+            baseUrl = "https://localhost:7013/";
+        }
+        else
+        {
+            throw new InvalidOperationException("Missing critical configuration: 'LlmProxy:BaseUrl' is not set in the environment.");
+        }
     }
 
     client.BaseAddress = new Uri(baseUrl);
 
-    // Extract the key from configuration and inject it into the X-API-KEY header
-    // and falls back to checking the flat environment variable name injected by Azure Secrets
     var apiKey = builder.Configuration["ServiceB:ApiKey"]
         ?? Environment.GetEnvironmentVariable("ServiceB__ApiKey");
 
@@ -66,8 +65,11 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("StrictSecurityPolicy", policyBuilder =>
     {
+        // Hämtar tillåtna origins från appsettings.json eller Azure, faller tillbaka på localhost under utveckling
+        var allowedOrigin = builder.Configuration["AllowedOrigins"] ?? "http://localhost:5173";
+
         policyBuilder
-            .WithOrigins("https://frontend-app.ashyflower-20b74b17.swedencentral.azurecontainerapps.io")
+            .WithOrigins(allowedOrigin)
             .WithMethods("GET", "POST")
             .AllowAnyHeader();
     });
