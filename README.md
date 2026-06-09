@@ -14,6 +14,10 @@ The system consists of three containerized services that run together both local
 
 The AI‑driven functionality is built around Gemini, which is used to generate content based on user input. The frontend sends a prompt to the AI Content API, which validates the request and forwards it to the LLM Proxy. The LLM Proxy then communicates directly with Gemini by using an API key. When it receives the generated text it returns it to the AI Content API which in turn sends the response back to the user in the frontend. This architechture ensures separation of concerns while also making it easy to observe how data flows through the system. The AI feature is fully functional both locally and in production.
 
+%% Endpoints
+
+The backend has two endpoints, one GET endpoint which is just a helper and can be used to determine the version of Gemini currently being used in case the current one has been phased out. And the second POST endpoint, the most important one, is responsible for Ai content generation. It accepts a user prompt from the frontend and returns the Ai generated response after it has passed through the AI Content API and the LLM Proxy.
+
 ## CI/CD Pipeline
 
 The CI/CD pipeline is responsible for building, testing, and deploying the entire system in a consistent and automated way. Every change pushed to the repository triggers a workflow that restores dependencies, compiles the backend services, and runs all automated tests to ensure that the application behaves as expected before any deployment takes place. When changes are merged into the main branch, the pipeline builds fresh Docker images for all services, tags them with both the commit SHA and a latest tag, and pushes them to Azure Container Registry. After the images are published, the pipeline updates the running Azure Container Apps environment so that the new versions of the services are deployed without manual intervention. This process ensures that the system remains reproducible, traceable, and stable across releases, while also reducing the risk of configuration drift or human error during deployment.
