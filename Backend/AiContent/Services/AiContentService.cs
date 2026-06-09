@@ -30,12 +30,12 @@ namespace AI_Content_Assistant.Services
 
         public async Task<string> CreateAsync(string userQuery, CancellationToken ct)
         {
-            var timer = Stopwatch.StartNew();
+            // Stopwatch for per-step timing
+            var stepTimer = Stopwatch.StartNew();
 
-            LogStep("Building a Gemini prompt...", timer);
+            LogStep("Building a Gemini prompt...", stepTimer);
 
             await Task.Delay(10);
-
 
             // 1. Building system + user message
             string systemMessage =
@@ -50,12 +50,12 @@ namespace AI_Content_Assistant.Services
             // 2. Creating DTO to send to Service B
             var requestDto = new LlmRequestDto(finalPrompt);
 
-            LogStep("Sending prompt to Service B...", timer);
+            LogStep("Sending prompt to Service B...", stepTimer);
 
             // 3. Sending DTO to Service B
             var response = await _client.SendPromptAsync(requestDto, ct);
 
-            LogStep($"Response received from Service B status {response.StatusCode}", timer);
+            LogStep($"Response received from Service B status {response.StatusCode}", stepTimer);
 
             // 4. Error handling
             var status = (int)response.StatusCode;
@@ -92,17 +92,18 @@ namespace AI_Content_Assistant.Services
             // 6 Validate quality of the AI content
             AiContentValidator.Validate(dto.Answer);
 
-            LogStep("Gemini successfully generated output.", timer);
+            LogStep("Gemini successfully generated output.", stepTimer);
 
             // 7. Return final answer
             return dto.Answer;
         }
-        // Helping function for logging
 
         private void LogStep(string message, Stopwatch timer)
         {
             var elapsed = timer.ElapsedMilliseconds;
-            _logger.LogInformation($"LOG: {message} | ELAPSED={elapsed}");
+
+            _logger.LogInformation($"LOG: {message} (Elapsed={elapsed}ms)");
+
             timer.Restart();
         }
     }
