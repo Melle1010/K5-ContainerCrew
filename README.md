@@ -48,7 +48,8 @@ ContainerAppConsoleLogs_CL
 
 View 3 - Execution time & Logged message
 ```
-PLACEHOLDER
-PLACEHOLDER
-PLACEHOLDER
+ContainerAppConsoleLogs_CL
+| where Log_s contains "LOG:"
+| project TimeGenerated, Log_s
+| sort by TimeGenerated asc
 ```
