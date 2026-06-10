@@ -22,7 +22,7 @@ We use a two‑pipeline CI/CD setup in GitHub Actions:
 ## Motivation
 This separation ensures that all code is validated before merging, and only verified code is deployed. 
 It also aligns with real‑world DevOps practices and the assignment’s requirement for clear quality gates. 
-Deployment is predictable, traceable, and secure through OIDC‑based authentication.
+Deployment is predictable, traceable, and secure through Azure key vault.
 
 ## Consequences
 

@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="AiContent.Tests/AiContent.Tests.csproj" Id="86cdaac8-f30d-423e-b02f-c26205b9754a" />
   <Project Path="Backend/AiContent/AiContent.csproj" Id="4cef4497-0015-46cf-bafc-4bd7c9da9b02" />
   <Project Path="Backend/LlmProxy/LlmProxy.csproj" Id="3026e613-1e50-4bb9-a8d7-34ba52f0bd09" />
 </Solution>

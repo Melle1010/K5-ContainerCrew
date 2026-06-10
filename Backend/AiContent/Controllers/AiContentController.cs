@@ -6,7 +6,6 @@ using AI_Content_Assistant.DTOs;
 namespace CloudNativeInventory.Api.Controllers;
 
 [ApiController]
-[EnableRateLimiting("sliding")]
 [Route("api/[controller]")]
 public class AiContentController : ControllerBase
 {

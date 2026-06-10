@@ -2,6 +2,7 @@
 using AI_Content_Assistant.DTOs;
 using AI_Content_Assistant.Exceptions;
 using AI_Content_Assistant.Validators;
+using System.Diagnostics;
 using System.Net;
 
 namespace AI_Content_Assistant.Services
@@ -27,10 +28,14 @@ namespace AI_Content_Assistant.Services
             return await _client.GetModelsAsync(ct);
         }
 
-
         public async Task<string> CreateAsync(string userQuery, CancellationToken ct)
         {
-            _logger.LogInformation("Building a Gemini prompt...");
+            // Stopwatch for per-step timing
+            var stepTimer = Stopwatch.StartNew();
+
+            LogStep("Building a Gemini prompt...", stepTimer);
+
+            await Task.Delay(10);
 
             // 1. Building system + user message
             string systemMessage =
@@ -45,35 +50,42 @@ namespace AI_Content_Assistant.Services
             // 2. Creating DTO to send to Service B
             var requestDto = new LlmRequestDto(finalPrompt);
 
-            _logger.LogInformation("Sending prompt to Service B...");
+            LogStep("Sending prompt to Service B...", stepTimer);
 
             // 3. Sending DTO to Service B
             var response = await _client.SendPromptAsync(requestDto, ct);
 
-            _logger.LogInformation("Response received from Service B statis {StatusCode}", response.StatusCode);
+            LogStep($"Response received from Service B status {response.StatusCode}", stepTimer);
 
             // 4. Error handling
             var status = (int)response.StatusCode;
 
-            switch (status)
+            //switch (status)
+            //{
+            //    case 401:
+            //    case 403:
+            //        throw new UnauthorizedAccessException("Client is unauthorized or unauthenticated.");
+
+            //    case 429:
+            //        throw new RateLimitException("Rate limit exceeded. Please retry later.");
+
+            //    case int s when s >= 500 && s < 600:
+            //        throw new AiExternalException($"Service B returned {status}.");
+
+            //    default:
+            //        if (!response.IsSuccessStatusCode)
+            //            throw new AiExternalException($"Service B returned {status}.");
+            //        break;
+            //}
+
+
+            // Any non-success from Service B becomes an LlmProxyException
+            if (!response.IsSuccessStatusCode)
             {
-                case 401:
-                case 403:
-                    throw new UnauthorizedAccessException("Client is unauthorized or unauthenticated.");
-
-                case 429:
-                    throw new RateLimitException("Rate limit exceeded. Please retry later.");
-
-                case 503:
-                    throw new GeminiOverloadedException("Gemini is currently overloaded. Please try again later.");
-
-                case >= 500 and < 600:
-                    throw new AiExternalException($"Service B returned {status}.");
-
-                default:
-                    if (!response.IsSuccessStatusCode)
-                        throw new AiExternalException($"Service B returned {status}.");
-                    break;
+                throw new LlmProxyException(
+                    status,
+                    $"Service B returned status {status}."
+                );
             }
 
 
@@ -85,13 +97,22 @@ namespace AI_Content_Assistant.Services
                 throw new AiEmptyResponseException("Service B returned an empty response.");
             }
 
-            _logger.LogInformation("Gemini successfully generated output.");
-
             // 6 Validate quality of the AI content
             AiContentValidator.Validate(dto.Answer);
 
+            LogStep("Gemini successfully generated output.", stepTimer);
+
             // 7. Return final answer
             return dto.Answer;
+        }
+
+        private void LogStep(string message, Stopwatch timer)
+        {
+            var elapsed = timer.ElapsedMilliseconds;
+
+            _logger.LogInformation($"LOG: {message} (Elapsed={elapsed}ms)");
+
+            timer.Restart();
         }
     }
 }

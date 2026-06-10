@@ -19,7 +19,7 @@ namespace AI_Content_Assistant.Validators
                 }
             }
 
-            if (sentenceCount > 5)
+            if (sentenceCount > 10)
                 throw new AiContentQualityException(
                     $"AI response contains too many sentences ({sentenceCount}). Maximum allowed is 5.");
         }

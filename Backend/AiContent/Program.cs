@@ -7,10 +7,12 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using System.Reflection;
-
-
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//Activating Teleometry which sends data to Azure Monitor
+//builder.Services.AddOpenTelemetry().UseAzureMonitor();
 
 // Controllers + Swagger
 builder.Services.AddControllers();
@@ -22,7 +24,6 @@ builder.Services.AddSwaggerGen(options =>
     options.IncludeXmlComments(xmlPath);
 });
 
-
 // Services
 builder.Services.AddScoped<IAiContentService, AiContentService>();
 builder.Services.AddControllers(options =>
@@ -30,56 +31,51 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<ExecutionTimeFilter>();
 });
 
-//Ratelimiting
-builder.Services.AddRateLimiter(options =>
-{
-    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-
-    options.OnRejected = async (context, token) =>
-    {
-        // Throwing here will produce a faulted Task and bubble to your ExceptionMiddleware
-        throw new RateLimitException("You have exceeded the allowed number of requests. Please try again later.");
-    };
-
-    options.AddSlidingWindowLimiter("sliding", config =>
-    {
-        config.Window = TimeSpan.FromMinutes(1);
-        config.SegmentsPerWindow = 2;
-        config.PermitLimit = 2;
-    });
-});
-
-
+// HttpClient Configuration with Base URL and Key Validation Injection
 builder.Services.AddHttpClient<AiContentClient>(client =>
 {
-    string baseUrl;
+    string? baseUrl = builder.Configuration["LlmProxy:BaseUrl"];
 
-    if (builder.Environment.IsDevelopment())
+    // Om variabeln saknas helt i produktion/container slänger vi ett fel i stället för att ha en hårdkodad länk
+    if (string.IsNullOrWhiteSpace(baseUrl))
     {
-        // Local development: Use localhost with HTTPS port
-        baseUrl = builder.Configuration["LlmProxy:BaseUrl"] ?? "https://localhost:7013/";
-    }
-    else
-    {
-        // Docker/Production: Use service name with HTTP port
-        baseUrl = "http://llmproxy:8080/";
+        if (builder.Environment.IsDevelopment())
+        {
+            baseUrl = "https://localhost:7013/";
+        }
+        else
+        {
+            throw new InvalidOperationException("Missing critical configuration: 'LlmProxy:BaseUrl' is not set in the environment.");
+        }
     }
 
     client.BaseAddress = new Uri(baseUrl);
+
+    var apiKey = builder.Configuration["ServiceB:ApiKey"]
+        ?? Environment.GetEnvironmentVariable("ServiceB__ApiKey");
+
+    if (!string.IsNullOrWhiteSpace(apiKey))
+    {
+        client.DefaultRequestHeaders.Add("X-API-KEY", apiKey);
+    }
 });
 
-//CORS POLICY
+// CORS POLICY
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("StrictSecurityPolicy", policyBuilder =>
     {
-        policyBuilder.WithOrigins("https://change-this-to-be-your-frontend-app.azurewebsites.net").WithMethods("GET", "POST").AllowAnyHeader(); //CHANGE THIS TO YOUR FRONTEND APP URL. THIS IS A PLACEHOLDER!!!
+        // Hämtar tillåtna origins från appsettings.json eller Azure, faller tillbaka på localhost under utveckling
+        var allowedOrigin = builder.Configuration["AllowedOrigins"] ?? "http://localhost:5173";
+
+        policyBuilder
+            .WithOrigins(allowedOrigin)
+            .WithMethods("GET", "POST")
+            .AllowAnyHeader();
     });
 });
 
 var app = builder.Build();
-
-
 
 app.UseCustomExceptionHandling();
 
@@ -93,7 +89,7 @@ app.UseSwagger(options =>
 // Enable Scalar UI
 app.MapScalarApiReference();
 
-app.UseRateLimiter();
+//app.UseRateLimiter();
 
 if (!app.Environment.IsEnvironment("Container"))
 {
