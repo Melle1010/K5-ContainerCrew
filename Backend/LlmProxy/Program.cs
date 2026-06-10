@@ -38,8 +38,8 @@ builder.Services.AddRateLimiter(options =>
     options.AddSlidingWindowLimiter("sliding", config =>
     {
         config.Window = TimeSpan.FromMinutes(1);
-        config.SegmentsPerWindow = 2;
-        config.PermitLimit = 2;
+        config.SegmentsPerWindow = 5;
+        config.PermitLimit = 10;
     });
 });
 
