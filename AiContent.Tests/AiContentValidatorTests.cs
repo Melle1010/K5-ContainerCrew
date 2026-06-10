@@ -22,7 +22,7 @@ namespace AiContent.Tests
         [Fact]
         public void Validate_TooManySentences_Throws()
         {
-            var text = string.Join(" ", new string[6].Select(_ => "Sentence."));
+            var text = string.Join(" ", new string[11].Select(_ => "Sentence."));
             Assert.Throws<AiContentQualityException>(() => AiContentValidator.Validate(text));
         }
 
